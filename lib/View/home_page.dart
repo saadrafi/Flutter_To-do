@@ -1,5 +1,4 @@
 // @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:todo/Extra/appbartitle.dart';
 import 'package:todo/Extra/custom_toast.dart';
@@ -7,6 +6,8 @@ import 'package:todo/View/note_add.dart';
 import 'package:todo/constants/cosntant.dart';
 import 'package:todo/database/database_helper.dart';
 import 'package:todo/model/note.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
 
 class HomePage extends StatefulWidget {
   @override
@@ -85,9 +86,42 @@ class _HomePageState extends State<HomePage> {
 
       case 'Edit':
         CustomToast.toast('Edit clicked');
+
         break;
     }
   }
+
+/*   Widget showAlert() {
+    return Alert(
+      context: context,
+      type: AlertType.warning,
+      title: "Are You Sure?",
+      desc: "Click delete to delete note",
+      buttons: [
+    DialogButton(
+      child: Text(
+        "Cancle",
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      ),
+      onPressed: () => Navigator.pop(context),
+      color: Color.fromRGBO(0, 179, 134, 1.0),
+    ),
+    DialogButton(
+      child: Text(
+        "Delete",
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      ),
+      onPressed: () {
+
+      },
+      gradient: LinearGradient(colors: [
+        Color.fromRGBO(116, 116, 191, 1.0),
+        Color.fromRGBO(52, 138, 199, 1.0)
+      ]),
+    )
+      ],
+    ).show();
+  } */
 
   void onDelete(int id) async {
     int isDeleted = await _db.deleteNote(id);
