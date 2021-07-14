@@ -1,37 +1,34 @@
 //@dart=2.9
 
 import 'dart:io';
-import 'package:path/path.dart';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 import 'package:todo/model/note.dart';
 
 class DatabaseHelper {
   Future<Database> initDatabase() async {
     Directory directory = await getApplicationDocumentsDirectory();
-
-    final path = join(directory.path, 'todo.db');
+    final path = join(directory.path, 'notebook.db');
 
     return await openDatabase(path, version: 1,
         onCreate: (Database db, int version) async {
       await db.execute(
-          "CREATE TABLE todo(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,content TEXT, date TEXT)""");
+          "CREATE TABLE note(id INTEGER PRIMARY KEY AUTOINCREMENT,title TEXT,content TEXT, date TEXT)"
+          "");
     });
   }
 
   Future<int> addNote(NoteBook noteBook) async {
     final db = await initDatabase();
-    return db.insert(
-      'todo',
-      noteBook.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.ignore,
-    );
+    return db.insert('note', noteBook.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
   }
 
   Future<List<NoteBook>> fetchNoteList() async {
     final db = await initDatabase();
-    final maps = await db.query('todo');
+
+    final maps = await db.query('note');
 
     return List.generate(maps.length, (index) {
       return NoteBook(
@@ -40,7 +37,12 @@ class DatabaseHelper {
         content: maps[index]['content'],
         date: maps[index]['date'],
       );
-
     });
   }
+
+  Future<int> deleteNote(int id) async {
+    final db = await initDatabase();
+    return await db.delete('note', where: "id = ?", whereArgs: [id]);
+  }
 }
+

@@ -21,6 +21,7 @@ class _NoteAddPageState extends State<NoteAddPage> {
   @override
   void initState() {
     super.initState();
+     _db = DatabaseHelper();
     _date =
         DateFormatter.getDateFormat(DateTime.now().toString().substring(0, 10));
     _titleController = TextEditingController();
@@ -188,6 +189,7 @@ class _NoteAddPageState extends State<NoteAddPage> {
                     margin: EdgeInsets.only(bottom: 25.0),
                     child: GestureDetector(
                       onTap: () async {
+                        // Navigator.pop(context, true);
                         if (_titleController.text == '') {
                           CustomToast.toast('Enter The title');
                         } else if (_contentController.text == '') {
@@ -203,11 +205,12 @@ class _NoteAddPageState extends State<NoteAddPage> {
                               content: _contentController.text,
                               date: _date);
                           var isAdded = await _db.addNote(note);
-                          if (isAdded == 1) {
+                          if (isAdded != null) {
                             setState(() {
                               isLoading = false;
                             });
                             CustomToast.toast('Note Added');
+                            Navigator.pop(context, true);
                           } else {
                             setState(() {
                               isLoading = false;
