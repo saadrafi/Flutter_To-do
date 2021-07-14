@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:todo/Extra/appbartitle.dart';
 import 'package:todo/View/note_add.dart';
 import 'package:todo/constants/cosntant.dart';
+import 'package:todo/database/database_helper.dart';
+import 'package:todo/model/note.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,6 +15,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   //-------------------Variable-----------------------
   String _greeting;
+  DatabaseHelper _db;
+  bool isLoading;
+  List<NoteBook> noteList;
+  List<NoteBook> storeList;
 
   //--------------------Function------------------------
 
@@ -20,8 +26,35 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement
     super.initState();
-
+    noteList = [];
+    storeList = [];
+    fetchNoteList();
+    _db = DatabaseHelper();
+    isLoading = true;
     greetings();
+  }
+
+  Future<void> fetchNoteList() async {
+    try {
+      var notes = await _db.fetchNoteList();
+      if (notes.length > 0) {
+        setState(() {
+          noteList.addAll(notes);
+          storeList.addAll(notes);
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+          noteList = [];
+        });
+      }
+    } catch (error) {
+      setState(() {
+        isLoading = false;
+        noteList = [];
+      });
+    }
   }
 
   void greetings() {
@@ -50,11 +83,11 @@ class _HomePageState extends State<HomePage> {
           elevation: 0.0,
           child: Icon(Icons.add),
           backgroundColor: kColorPrimary,
-          onPressed: () {
+          onPressed: () async {
             setState(() {
               print('Clicked');
             });
-            Navigator.push(
+            bool isAdded = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) {
@@ -62,6 +95,13 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
             );
+            if (isAdded == true) {
+              setState(() {
+                noteList = [];
+                isLoading = true;
+              });
+              fetchNoteList();
+            }
           },
         ),
       ),
@@ -159,87 +199,107 @@ class _HomePageState extends State<HomePage> {
                       SizedBox(
                         height: 10,
                       ),
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        separatorBuilder: (context, index) =>
-                            SizedBox(height: 5),
-                        itemCount: 5,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: EdgeInsets.only(
-                                left: 15, right: 15, top: 0, bottom: 0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(color: kColorLight),
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Notes',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .subtitle1
-                                                .copyWith(
-                                                    fontWeight:
-                                                        FontWeight.w700),
+                      !isLoading
+                          ? noteList.contains(null) || noteList.length <= 0
+                              ? Container(
+                                  child: Text('No Notes Available'),
+                                )
+                              : ListView.separated(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  separatorBuilder: (context, index) =>
+                                      SizedBox(height: 5),
+                                  itemCount: 5,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                          left: 15,
+                                          right: 15,
+                                          top: 0,
+                                          bottom: 0),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          border:
+                                              Border.all(color: kColorLight),
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                        ),
+                                        child: Padding(
+                                          padding: EdgeInsets.all(8.0),
+                                          child: Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      'Notes',
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .subtitle1
+                                                          .copyWith(
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w700),
+                                                    ),
+                                                    Text(
+                                                      '',
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .subtitle2,
+                                                    ),
+                                                    Text(
+                                                      '',
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .bodyText2,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              //----------POpUpMEnu----------------
+                                              PopupMenuButton(
+                                                itemBuilder: (BuildContext
+                                                        context) =>
+                                                    <PopupMenuEntry<String>>[
+                                                  PopupMenuItem<String>(
+                                                    value: 'Edit',
+                                                    child: ListTile(
+                                                      leading: Icon(Icons.edit),
+                                                      title: Text('Update'),
+                                                    ),
+                                                  ),
+                                                  PopupMenuItem<String>(
+                                                    value: 'Delete',
+                                                    child: ListTile(
+                                                      leading:
+                                                          Icon(Icons.delete),
+                                                      title: Text('Delete'),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            '',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .subtitle2,
-                                          ),
-                                          Text(
-                                            '',
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText2,
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                    ),
-                                    //----------POpUpMEnu----------------
-                                    PopupMenuButton(
-                                      itemBuilder: (BuildContext context) =>
-                                          <PopupMenuEntry<String>>[
-                                        PopupMenuItem<String>(
-                                          value: 'Edit',
-                                          child: ListTile(
-                                            leading: Icon(Icons.edit),
-                                            title: Text('Update'),
-                                          ),
-                                        ),
-                                        PopupMenuItem<String>(
-                                          value: 'Delete',
-                                          child: ListTile(
-                                            leading: Icon(Icons.delete),
-                                            title: Text('Delete'),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                                    );
+                                  },
+                                )
+                          : Center(
+                              child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation(kColorPrimary),
+                            )),
                     ],
                   ),
                 ),
