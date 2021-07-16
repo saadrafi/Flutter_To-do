@@ -6,7 +6,7 @@ class CustomButton extends StatelessWidget {
   final String text;
   final Color mainColor;
   final Color borderColor;
-  final Function onpress;
+  final Function() onpress;
 
   CustomButton({this.text, this.mainColor, this.borderColor, this.onpress});
 
@@ -15,6 +15,7 @@ class CustomButton extends StatelessWidget {
     return GestureDetector(
       onTap: onpress,
       child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 15.0),
         decoration: BoxDecoration(
           border: Border.all(color: borderColor),
           color: mainColor,

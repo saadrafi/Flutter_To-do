@@ -3,6 +3,7 @@ import 'package:todo/View/Login/splash.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:todo/View/home_page.dart';
+import 'package:todo/login/welcome_secreen.dart';
 
 import 'View/Login/login_page.dart';
 
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(),
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: WelcomePage(),
     );
   }
 }
